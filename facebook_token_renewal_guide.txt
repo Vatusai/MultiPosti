@@ -1,0 +1,186 @@
+=========================================================================
+                     FACEBOOK TOKEN RENEWAL GUIDE
+                        MultiPosti Application
+=========================================================================
+
+📋 OVERVIEW
+-----------
+Facebook tokens have different expiration timelines:
+• Short-lived User Token: 1-2 hours
+• Long-lived User Token: 60 days
+• Page Access Token (from long-lived user token): NEVER EXPIRES*
+
+*Page tokens can be invalidated if:
+- App password changes
+- Page admin permissions are revoked
+- App permissions change
+- Facebook security updates
+
+🔍 WHEN TO RENEW TOKENS
+-----------------------
+IMMEDIATE RENEWAL NEEDED:
+• Upload fails with "OAuthException" errors
+• Authentication errors in MultiPosti
+• "(#190) Invalid OAuth access token" messages
+
+PREVENTIVE RENEWAL (RECOMMENDED):
+• Every 30-60 days as good practice
+• After changing Facebook app settings
+• After changing page admin permissions
+• Before important upload campaigns
+
+⚡ QUICK RENEWAL STEPS
+---------------------
+1. Go to Facebook Graph API Explorer: https://developers.facebook.com/tools/explorer/
+2. Select your app: "DigiViolin" (App ID: 1438267127386307)
+3. Generate User Token with permissions
+4. Convert to Long-lived Token
+5. Get Page Token
+6. Update MultiPosti credentials
+
+🔧 DETAILED RENEWAL PROCESS
+---------------------------
+
+STEP 1: ACCESS GRAPH API EXPLORER
+• Open: https://developers.facebook.com/tools/explorer/
+• Login with your Facebook account (page admin)
+• Select your app "DigiViolin" from dropdown
+
+STEP 2: GENERATE USER ACCESS TOKEN
+• Click "Generate Access Token" button
+• Grant permissions when prompted
+• Required permissions for video upload:
+  - pages_show_list
+  - pages_read_engagement  
+  - pages_manage_posts
+  - pages_manage_metadata
+• Copy the generated short-lived user token
+
+STEP 3: CONVERT TO LONG-LIVED USER TOKEN
+• In Graph API Explorer, click "Get Token" → "Get User Access Token"
+• Click "Extend Access Token" at the bottom
+• Copy the new long-lived token (valid for 60 days)
+• Or use this URL format:
+  https://graph.facebook.com/oauth/access_token?client_id=1438267127386307&client_secret=YOUR_APP_SECRET&grant_type=fb_exchange_token&fb_exchange_token=SHORT_LIVED_TOKEN
+
+STEP 4: GET PAGE ACCESS TOKEN (NEVER EXPIRES)
+• Using the long-lived user token, make this request:
+  GET /me/accounts
+• In Graph API Explorer:
+  - Put the long-lived user token in "Access Token" field
+  - Query: /me/accounts
+  - Click "Submit"
+• Find your page "730666933472073" in the results
+• Copy the "access_token" for your page (this never expires!)
+
+STEP 5: UPDATE MULTIPOSTI CREDENTIALS
+• Open: C:\Users\Fabian Orozco\MultiPosti\credentials\facebook\facebook_token.json
+• Replace the "access_token" field with your new page token
+• Keep the same page_id and app_id
+• Save the file
+
+STEP 6: TEST THE UPDATE
+• Run: python scripts/main.py auth facebook
+• Should show "SUCCESS: Facebook authentication successful!"
+• Test upload: python scripts/main.py upload tutorial.mp4 --platforms facebook --title "Test"
+
+📱 ALTERNATIVE METHOD: USING URLS DIRECTLY
+------------------------------------------
+
+1. GET LONG-LIVED USER TOKEN:
+https://graph.facebook.com/oauth/access_token?client_id=1438267127386307&client_secret=YOUR_APP_SECRET&grant_type=fb_exchange_token&fb_exchange_token=SHORT_LIVED_USER_TOKEN
+
+2. GET PAGE TOKEN:
+https://graph.facebook.com/v18.0/me/accounts?access_token=LONG_LIVED_USER_TOKEN
+
+🔐 SECURITY BEST PRACTICES
+--------------------------
+• Never share your app secret publicly
+• Store tokens securely
+• Revoke old tokens when generating new ones
+• Use HTTPS for all API calls
+• Monitor token usage in Facebook Developer Console
+
+🛠️ TROUBLESHOOTING COMMON ISSUES
+--------------------------------
+
+ERROR: "Invalid OAuth access token"
+SOLUTION: Token has expired, follow renewal steps above
+
+ERROR: "No permission to publish video"
+SOLUTION: 
+- Check if you're using PAGE token (not user token)
+- Verify pages_manage_posts permission is granted
+- Confirm you're admin of the page
+
+ERROR: "App not setup for this feature"
+SOLUTION:
+- Check app is in "Live" mode (not Development)
+- Verify app has proper permissions configured
+
+ERROR: "Token validation failed"
+SOLUTION:
+- Check token isn't truncated when copying
+- Ensure no extra spaces in token string
+- Try generating new token
+
+🔍 HOW TO CHECK TOKEN VALIDITY
+------------------------------
+
+METHOD 1: MultiPosti Test
+• Run: python scripts/main.py auth facebook
+• Success = token is valid
+
+METHOD 2: Graph API Explorer
+• Paste token in Graph API Explorer
+• Query: /me (for user token) or /PAGE_ID (for page token)
+• If returns data = token is valid
+
+METHOD 3: Direct API Call
+• GET https://graph.facebook.com/v18.0/me?access_token=YOUR_TOKEN
+• Status 200 = valid, Status 400/401 = invalid
+
+📅 RECOMMENDED MAINTENANCE SCHEDULE
+----------------------------------
+• MONTHLY: Check token validity
+• QUARTERLY: Renew tokens preventively  
+• IMMEDIATELY: After any Facebook app/page changes
+• BEFORE CAMPAIGNS: Test uploads before important events
+
+🚨 EMERGENCY TROUBLESHOOTING
+----------------------------
+If uploads suddenly stop working:
+
+1. Check Facebook Developer Console for app alerts
+2. Verify page admin status hasn't changed
+3. Generate new tokens immediately
+4. Check for Facebook platform outages
+5. Review app permissions in Facebook settings
+
+📋 CURRENT TOKEN INFORMATION
+---------------------------
+Your MultiPosti setup:
+• App ID: 1438267127386307
+• Page ID: 730666933472073
+• Token Type: Page Access Token (Never expires if from long-lived user token)
+• Current Token: EAAUcGKk4UMMBPWjjKlP6tbx75wLNAWyEUZBzIA...
+
+💡 PRO TIPS
+-----------
+• Save tokens in a secure password manager
+• Keep backup tokens (generate multiple page tokens)
+• Document token generation dates
+• Set calendar reminders for preventive renewal
+• Test tokens in Graph API Explorer before updating MultiPosti
+
+📞 SUPPORT RESOURCES
+--------------------
+• Facebook Developer Documentation: https://developers.facebook.com/docs/
+• Graph API Explorer: https://developers.facebook.com/tools/explorer/
+• Facebook Developer Community: https://developers.facebook.com/community/
+• MultiPosti Issues: Check console logs for detailed error messages
+
+=========================================================================
+Last Updated: August 2024
+For MultiPosti v1.0
+=========================================================================

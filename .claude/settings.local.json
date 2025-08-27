@@ -7,7 +7,19 @@
       "Bash(git init:*)",
       "Bash(gh repo create:*)",
       "Bash(where gh)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(cat:*)",
+      "Bash(del:*)",
+      "Bash(chcp:*)",
+      "Bash(set PYTHONIOENCODING=utf-8)",
+      "WebFetch(domain:developers.facebook.com)",
+      "WebSearch",
+      "Bash(git rm:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git log:*)",
+      "Bash(git filter-branch:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []

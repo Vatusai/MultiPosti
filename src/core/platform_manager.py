@@ -31,16 +31,17 @@ class PlatformManager:
     def _initialize_platforms(self):
         """Initialize all available platform implementations"""
         try:
-            # Import and register YouTube platform
-            from platforms.youtube.youtube_platform import YouTubePlatform
-            self.register_platform('youtube', YouTubePlatform)
+            # Import and register YouTube platform - TEMPORARILY DISABLED
+            # from platforms.youtube.youtube_platform import YouTubePlatform
+            # self.register_platform('youtube', YouTubePlatform)
             
-            # TODO: Add other platforms as they're implemented
-            # from platforms.facebook.facebook_platform import FacebookPlatform
-            # self.register_platform('facebook', FacebookPlatform)
+            # Import and register TikTok platform
+            from platforms.tiktok.tiktok_platform import TikTokPlatform
+            self.register_platform('tiktok', TikTokPlatform)
             
-            # from platforms.tiktok.tiktok_platform import TikTokPlatform  
-            # self.register_platform('tiktok', TikTokPlatform)
+            # Import and register Facebook platform
+            from platforms.facebook.facebook_platform import FacebookPlatform
+            self.register_platform('facebook', FacebookPlatform)
             
         except ImportError as e:
             self.logger.warning(f"Some platforms could not be imported: {e}")

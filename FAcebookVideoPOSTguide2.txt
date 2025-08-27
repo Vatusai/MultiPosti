@@ -1,0 +1,95 @@
+Publicación
+La API de video te permite publicar videos y reels en páginas de Facebook.
+
+Requisitos
+Para publicar un video en una página, necesitarás lo siguiente:
+
+Un token de acceso a la página solicitado por una persona que pueda realizar la tarea CREATE_CONTENT en la página
+La persona que solicita el token debe permitir que tu app acceda a los siguientes permisos mediante el inicio de sesión con Facebook:
+pages_show_list
+pages_read_engagement
+pages_manage_posts
+Un identificador de video
+Se obtiene este identificador cuando subes el archivo de tu video a los servidores de Meta mediante la API de subida reanudable
+Publicar un video
+Para publicar un video, envía una solicitud POST al punto de conexión /<PAGE_ID>/videos con
+
+curl -X POST \
+  "https://graph-video.facebook.com/v23.0/<PAGE_ID>/videos" \
+  -F "access_token=<PAGE_ACCESS_TOKEN>" \
+  -F "title=<VIDEO_TITLE>" \
+  -F "description=<VIDEO_DESCRIPTION>" \ 
+  -F "fbuploader_video_file_chunk=<UPLOADED_FILE_HANDLE>"
+Si la operación se procesa correctamente, la app recibirá una respuesta JSON con el identificador de video.
+
+{
+  "id":"<VIDEO_ID>"
+}
+Subir un archivo de video
+El siguiente contenido proviene de la documentación de la API de subida reanudable.
+
+Subir un archivo
+La API de subida reanudable te permite subir archivos grandes a la gráfica social de Meta y reanudar las sesiones de subida interrumpidas sin tener que empezar de nuevo. Una vez que hayas subido tu archivo, podrás publicarlo.
+
+Las referencias a los puntos de conexión que admiten identificadores de archivos subidos indicarán si los puntos de conexión son compatibles con los identificadores que devuelve la API de subida reanudable.
+
+Antes de empezar
+En esta guía se presupone que has leído las guías Información general sobre la API Graph y Desarrollo en Meta, y que has realizado las acciones necesarias para el desarrollo con Meta.
+
+Necesitarás lo siguiente:
+
+Un ID de la app de Meta
+Un archivo en uno de los siguientes formatos:
+pdf
+jpeg
+jpg
+png
+Un token de acceso de usuario
+Paso 1: Iniciar una sesión de subida
+Para comenzar una sesión de subida, envía una solicitud POST al punto de conexión /<APP_ID>/uploads, donde <APP_ID> es el identificador de Meta de tu app, con los siguientes parámetros obligatorios:
+
+file_name: el nombre de tu archivo
+file-length: el tamaño del archivo en bytes
+file-type: el tipo MIME del archivo Los valores válidos son: application/pdf, image/jpeg, image/jpg, image/png y video/mp4
+Sintaxis de la solicitud
+El formato se modificó para facilitar la lectura.
+
+curl -i -X POST "https://graph.facebook.com/v23.0/<APP_ID>/uploads
+  ?file_name=<FILE_NAME>
+  &file_length=<FILE_LENGTH>
+  &file_type=<FILE_TYPE>
+  &access_token=<USER_ACCESS_TOKEN>"
+Si la operación se realiza con éxito, tu app recibirá una respuesta JSON que contiene el identificador de sesión de subida.
+
+{
+  "id": "upload:<UPLOAD_SESSION_ID>"
+}
+Paso 2: Comenzar la subida
+Empieza a subir el archivo enviando una solicitud POST al punto de conexión /upload:<UPLOAD_SESSION_ID> con el siguiente file_offset configurado en 0.
+
+Sintaxis de la solicitud
+curl -i -X POST "https://graph.facebook.com/v23.0/upload:<UPLOAD_SESSION_ID>" --header "Authorization: OAuth <USER_ACCESS_TOKEN>" --header "file_offset: 0" --data-binary @<FILE_NAME>
+Debes incluir el token de acceso en el encabezado; en caso contrario, se producirá un error en la llamada.
+
+Si la operación se realiza con éxito, tu app recibirá el identificador de archivos que utilizarás en tus llamadas a la API para publicar el archivo en tu punto de conexión.
+
+{
+  "h": "<UPLOADED_FILE_HANDLE>"
+}
+Ejemplo de respuesta
+{
+    "h": "2:c2FtcGxl..."
+}
+Reanudar una subida interrumpida
+Si iniciaste una sesión de subida, pero toma más tiempo del que se espera o se interrumpió, envía una solicitud GET al punto de conexión /upload:<UPLOAD_SESSION_ID> del Paso 1.
+
+curl -i -X GET "https://graph.facebook.com/v23.0/upload:<UPLOAD_SESSION_ID>" --header "Authorization: OAuth <USER_ACCESS_TOKEN>"
+Si la operación se realiza correctamente, tu app recibirá una respuesta JSON con el valor file_offset, que puedes usar para reanudar el proceso de subida desde donde se interrumpió.
+
+{
+  "id": "upload:<UPLOAD_SESSION_ID>"
+  "file_offset": "<FILE_OFFSET>"
+}
+Envía otra solicitud POST, como la que enviaste en el Paso 2, con file_offset configurado en el valor file_offset que acabas de recibir. Esto reanudará el proceso de subida desde el punto donde se interrumpió.
+
+curl -i -X POST "https://graph.facebook.com/v23.0/upload:<UPLOAD_SESSION_ID>" --header "Authorization: OAuth <USER_ACCESS_TOKEN>" --header "file_offset: <FILE_OFFSET>" --data-binary @<FILE_NAME>

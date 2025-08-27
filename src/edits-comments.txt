@@ -1,0 +1,1 @@
+YouTube uploads are now temporarily disabled. The platform won't be loaded or available for uploads. To re-enable later, just uncomment those two lines in src/core/platform_manager.py:35-36.

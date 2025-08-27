@@ -91,18 +91,19 @@ def main():
     
     # Authenticate command
     auth_parser = subparsers.add_parser('auth', help='Authenticate with platform')
-    auth_parser.add_argument('platform', choices=['youtube', 'facebook', 'tiktok'],
+    auth_parser.add_argument('platform', choices=['youtube', 'tiktok', 'instagram'],
                            help='Platform to authenticate with')
     
     # Upload command
     upload_parser = subparsers.add_parser('upload', help='Upload video to platforms')
     upload_parser.add_argument('video_path', help='Path to video file')
     upload_parser.add_argument('--platforms', '-p', nargs='+', 
-                             choices=['youtube', 'facebook', 'tiktok'],
+                             choices=['youtube', 'tiktok', 'instagram'],
                              default=['youtube'], help='Target platforms')
     upload_parser.add_argument('--title', '-t', required=True, help='Video title')
     upload_parser.add_argument('--description', '-d', default='', help='Video description')
     upload_parser.add_argument('--tags', nargs='*', help='Video tags (YouTube)')
+    upload_parser.add_argument('--hashtags', nargs='*', help='Hashtags (TikTok, Instagram)')
     upload_parser.add_argument('--privacy', choices=['private', 'public', 'unlisted'],
                              default='private', help='Privacy setting (YouTube)')
     
@@ -120,7 +121,8 @@ def main():
     
     # Initialize platform manager
     print("Initializing MultiPosti...")
-    manager = PlatformManager()
+    credentials_path = project_root / "credentials"
+    manager = PlatformManager(str(credentials_path))
     print(f"Loaded platforms: {', '.join(manager.get_available_platforms())}")
     print()
     
@@ -135,6 +137,7 @@ def main():
         # Prepare upload parameters
         upload_kwargs = {
             'tags': args.tags or [],
+            'hashtags': args.hashtags or [],
             'privacy': args.privacy
         }
         

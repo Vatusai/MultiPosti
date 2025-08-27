@@ -1,0 +1,112 @@
+from https://developers.facebook.com/docs/pages-api/getting-started
+
+Primeros pasos
+Este documento te brinda información sobre cómo llamar correctamente a la API de páginas para hacer una publicación en tu página.
+
+Antes de empezar
+Necesitarás lo siguiente:
+
+Una página de Facebook (puede tratarse de una página publicada o sin publicar, en la que se puede realizar la tarea CREATE_CONTENT).
+Un token de acceso a la página
+Los siguientes permisos:
+pages_manage_metadata
+pages_manage_posts
+pages_manage_read_engagement
+pages_show_list
+Prácticas recomendadas
+Al probar una llamada a la API, puedes incluir el parámetro access_token configurado en tu token de acceso. Sin embargo, para hacer llamadas seguras desde tu app, usa la clase de token de acceso.
+
+Paso 1. Obtén el identificador de la página
+Para obtener una lista de identificadores y tokens de acceso a la página de Facebook en las que se puede realizar una tarea, envía una solicitud GET al punto de conexión /user_id/accounts en el que user_id es tu identificador de usuario.
+
+Ejemplo de solicitud
+El formato se modificó para facilitar la lectura. Reemplaza los valores en negrita y en cursiva, como page_id, por tus propios valores.
+curl -i -X GET "https://graph.facebook.com/v23.0/user_id/accounts?access_token=user_access_token"
+Si la operación se procesa correctamente, tu app recibirá la siguiente respuesta JSON con una matriz de objetos. Los objetos contienen información sobre una página específica, que incluye el nombre, el identificador, un token de acceso a la página de corta duración, tareas que puedes realizar en la página y más:
+
+{
+  "data": [
+    {
+      "access_token": "page_access_token",
+      "category": "Internet Company",
+      "category_list": [
+        {
+          "id": "2256",
+          "name": "Internet Company"
+        }
+      ],
+      "name": "Name of this Page",
+      "id": "page_id",
+      "tasks": [
+        "ANALYZE",
+        "ADVERTISE",
+        "MODERATE",
+        "CREATE_CONTENT"
+      ]
+    },
+...
+Paso 2. Haz una publicación
+Si deseas hacer una publicación, envía una solicitud POST al punto de conexión /page_id/feed, en el que page_id es el identificador de la página en la que haces la publicación, con el parámetro message configurado en el contenido de tu mensaje, y el parámetro access_token configurado en el token de acceso a la página:
+
+Ejemplo de solicitud
+El formato se modificó para facilitar la lectura. Reemplaza los valores en negrita y en cursiva, como page_id, por tus propios valores.
+curl -X POST "https://graph.facebook.com/v23.0/page_id/feed" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "message":"your_message_text",
+           "access_token":"page_access_token",
+         }'
+La publicación se publicará de inmediato.
+
+Si la operación se procesa correctamente, tu app recibirá la siguiente respuesta JSON con el identificador de la publicación:
+
+{
+  "id": "page_post_id" 
+}
+Visita tu página de Facebook  para ver la publicación.
+
+Paso 3. Verifica tu publicación
+Si deseas verificar que se realizó la publicación en la página, envía una solicitud GET al punto de conexión /page_id/feed:
+
+Ejemplo de solicitud
+El formato se modificó para facilitar la lectura. Reemplaza los valores en negrita y en cursiva, como page_id, por tus propios valores.
+      curl -i -X GET "https://graph.facebook.com/v23.0/page_id/feed?access_token=page_access_token"
+Si la operación se procesa correctamente, tu app recibirá la siguiente respuesta JSON con una matriz de objetos. Los objetos incluyen el identificador de la publicación, el contenido del mensaje y la fecha y hora en que se creó la publicación:
+
+{
+  "data": [
+    {
+      "created_time": "2020-03-25T17:33:34+0000",
+      "message": "Hello World!",
+      "id": "422575694827569_917077345377399"  
+    },
+...
+  ]
+}
+Usa el explorador de la API Graph
+La herramienta del explorador de la API Graph es una interfaz de usuario que te permite experimentar con las API de Facebook sin necesidad de agregar código a tu app o sitio web. Puedes seleccionar permisos, obtener tokens de acceso, probar métodos GET, POST y DELETE, y obtener fragmentos de código relacionados con estas consultas para Android, iOS, JavaScript, PHP y cURL.
+
+Ten en cuenta que es necesario contar con un identificador de app de Facebook para utilizar el explorador de la API Graph.
+
+Paso 1. Obtén el identificador de la página
+Selecciona los permisos pages_manage_metadata, pages_manage_posts, pages_manage_read_engagement y pages_show_list, que se muestran en el menú desplegable de Permiso, establece la consulta GET en el punto de conexión /me/accounts ubicado en la casilla de consultas y haz clic en Enviar.
+
+
+Para mover el identificador a la casilla de consultas, haz clic en el identificador de tu página, que se muestra directamente abajo del nombre de la página.
+
+Paso 2. Haz una publicación en nombre de la página
+En el menú desplegable de usuario o página, selecciona el token de acceso a tu página. Luego, selecciona el método POST y configura el punto de conexión /{page-id}/feed como destino de la solicitud. A continuación, configura los siguientes parámetros: key con el valor message y value con el texto de tu publicación. Haz clic en Enviar.
+
+Si estos pasos se realizaron correctamente, el explorador de la API Graph mostrará el identificador de la publicación de la página.
+
+
+Visita tu página de Facebook para ver la publicación.
+
+Paso 3. Verifica tu publicación
+Envía una solicitud GET al punto de conexión /page-id/feed.
+
+Si dicha solicitud se envió correctamente, el explorador de la API Graph mostrará la fecha y hora en que se creó la publicación, el texto de dicha publicación y el identificador de la publicación de la página.
+
+
+Próximos pasos
+Consulta la guía sobre cómo gestionar una página de Facebook para descubrir cómo obtener y actualizar la información referida a tu página de Facebook, incluye detalles de la página, tokens de acceso, usuarios bloqueados y recomendaciones de los usuarios.

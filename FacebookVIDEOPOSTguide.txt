@@ -1,0 +1,150 @@
+from https://developers.facebook.com/docs/pages-api/posts
+
+Publicaciones
+En esta guía, se explica cómo crear, publicar y actualizar una publicación, a responder a una publicación en tu página de Facebook como la página, y a eliminar una publicación usando la API de páginas de Meta.
+
+Antes de empezar
+This guide assumes you have read the Overview
+
+For a person who can perform tasks on the page, you will need to implement Facebook Login to ask for the following permissions and receive a Page access token:
+
+pages_manage_engagement
+pages_manage_posts
+pages_read_engagement
+pages_read_user_engagement
+publish_video permission, if you are publishing a video to the Page
+Your app user must be able to perform the CREATE_CONTENT, MANAGE, and MODERATE tasks on the Page in the API requests.
+
+If your app users do not own or manage the Page in the API requests, your app will need a User access token and the following features:
+
+Page Public Content Access
+Prácticas recomendadas
+Al probar una llamada a la API, puedes incluir el parámetro access_token configurado en tu token de acceso. Sin embargo, para hacer llamadas seguras desde tu app, usa la clase de token de acceso.
+
+Realizar publicaciones
+Para realizar una publicación en una página, enviar una solicitud POST al punto de conexión /page_id/feed, donde page_id es el identificador de la página, con los siguientes parámetros:
+
+message configurado en el texto de la publicación
+link configurado en la URL si deseas publicar un enlace
+published configurado en true para realizar la publicación de manera inmediata (predeterminado) o false para publicarlo después
+Incluye scheduled_publish_time si está configurado en false con la fecha en alguno de los siguientes formatos:
+Una marca de tiempo UNIX entera [en segundos] (por ejemplo, 1530432000)
+Una cadena de marca de tiempo ISO 8061 (por ejemplo, 2018-09-01T10:15:30+01:00)
+Cualquier cadena analizable mediante la función strtotime() de PHP (por ejemplo, +2 weeks, tomorrow)
+Notas sobre publicaciones programadas
+La fecha de publicación debe ser un período de entre 10 minutos y 30 días a partir de la solicitud de la API.
+Si te basas en cadenas de fecha relativas de strtotime(), puedes realizar la lectura después de escritura de la scheduled_publish_time de la publicación creada para asegurarte de que quede como se espera.
+Ejemplo de solicitud
+El formato se modificó para facilitar la lectura. Reemplaza los valores en negrita y en cursiva, como page_id, por tus propios valores.
+curl -X POST "https://graph.facebook.com/v23.0/page_id/feed" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "message":"your_message_text",
+           "link":"your_url",
+           "published":"false",
+           "scheduled_publish_time":"unix_time_stamp_of_a_future_date",
+         }'
+Si la operación se procesa correctamente, tu app recibirá la siguiente respuesta JSON con el identificador de la publicación:
+
+{
+  "id": "page_post_id" 
+}
+Agregar la segmentación de audiencia
+Para limitar quién puede ver una publicación de la página, puedes agregar el objeto targeting.geo_locations o el parámetro feed_targeting.geo_locations en la solicitud POST.
+
+-d '{
+      ...
+      "targeting": {
+        "geo_locations": {
+          "countries": [
+            "CA"
+          ],
+          "cities": [
+            {
+              "key": "296875",
+              "name": "Toronto"
+            }
+          ]
+        }
+      },
+      ...
+    }'
+Solución de problemas
+En algunos casos, si se usa un país y una región, se produce el siguiente error: "Algunos de tus lugares se superponen. Elimina un lugar". En tales casos, segmenta la región o el país según la cobertura que quieras.
+
+Realizar publicaciones de contenido multimedia
+Puedes publicar fotos y vídeos en una página.
+
+Publicar una foto
+Para realizar una publicación en una página, envía una solicitud POST al punto de conexión /page_id/photos, donde page_id es el identificador de la página, con el parámetro url configurado en la foto de tu publicación.
+
+Ejemplo de solicitud
+El formato se modificó para facilitar la lectura. Reemplaza los valores en negrita y en cursiva, como page_id, por tus propios valores.
+curl -X POST "https://graph.facebook.com/v23.0/page_id/photos" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "url":"path_to_photo",
+Si la operación se procesa correctamente, tu app recibirá la siguiente respuesta JSON con el identificador de la foto y de la publicación:
+
+{
+  "id":"photo_id",
+  "post_id":"page_post_id" 
+}
+Publicar un video
+Consulta la documentación de la API de video para realizar una publicación con video en la página.
+
+Obtener publicaciones
+Para obtener una lista de las publicaciones de la página, envía una solicitud GET al punto de conexión /page_id/feed.
+
+Ejemplo de solicitud
+El formato se modificó para facilitar la lectura. Reemplaza los valores en negrita y en cursiva, como page_id, por tus propios valores.
+curl -i -X GET "https://graph.facebook.com/v23.0/page_id/feed"
+Si la operación se realiza correctamente, la app recibe la siguiente respuesta JSON con una matriz de objetos que incluyen el identificador de la publicación, la hora en que se creó la publicación, y el contenido de la publicación de cada publicación en la página:
+
+{
+  "data": [
+    {
+      "created_time": "2019-01-02T18:31:28+0000",
+      "message": "This is my test post on my Page.",
+      "id": "page_post_id"
+    }
+  ],
+...
+}
+Limitaciones
+Videos en vivo: si la publicación de una página contiene un video que caducó, como una transmisión en vivo, puedes obtener algunos campos de la publicación, pero no los relacionados con el video. El video tiene sus propias reglas de privacidad. Si el video caducó, debes ser el administrador de la página para ver la información.
+Llamada a la acción de mensajes: se pueden usar los tokens de acceso para solicitar publicaciones de páginas compartidas públicamente, siempre que tu app cuente con la aprobación de la función de acceso al contenido público de la página. Sin embargo, no es posible acceder a las publicaciones con llamadas a la acción de mensajes si se usa otro token de acceso a la página, ya que las páginas no pueden enviar mensajes a otras páginas.
+URL de publicación de la página
+La URL, o enlace permanente, de una publicación de la página es https://www.facebook.com/page_post_id.
+
+Actualizar una publicación
+Si deseas actualizar una publicación en una página, envía una solicitud POST al punto de conexión /{page-post-id} con los parámetros que deseas actualizar configurados en el nuevo contenido.
+
+Ejemplo de solicitud
+El formato se modificó para facilitar la lectura. Reemplaza los valores en negrita y en cursiva, como page_post_id, por tus propios valores.
+curl -X POST "https://graph.facebook.com/v23.0/page_post_id" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "message":"I am updating my Page post",
+         }'
+Si se hace correctamente, tu app recibirá la siguiente respuesta JSON con success configurado en "verdadero":
+
+{
+  "success": true
+}
+Limitaciones
+Una app solo puede actualizar una publicación de la página si se realizó con esa app.
+
+Eliminar una publicación
+Si deseas actualizar una publicación en una página, envía una solicitud /page_post_id al punto de conexión page_post_id, donde DELETE es el identificador de la publicación que deseas eliminar.
+
+Ejemplo de solicitud
+El formato se modificó para facilitar la lectura. Reemplaza los valores en negrita y en cursiva, como page_post_id, por tus propios valores.
+curl -i -X DELETE "https://graph.facebook.com/v23.0/page_post_id"
+Si se hace correctamente, tu app recibirá la siguiente respuesta JSON con success configurado en true:
+
+{
+  "success": true
+}
+Próximos pasos
+Obtén información sobre cómo comentar en publicaciones de la página y @mencionar a una persona o página específica que publicó o comentó en tu página.
